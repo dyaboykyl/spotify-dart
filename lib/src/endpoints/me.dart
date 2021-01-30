@@ -34,17 +34,31 @@ class Me extends EndpointPaging {
     return Player.fromJson(map);
   }
 
-  Future<Iterable<PlayHistory>> recentlyPlayed(
-      {int limit, DateTime after, DateTime before}) async {
-    assert(after == null || before == null,
-        'Cannot specify both after and before.');
+  Future<void> play() async {
+    await _api._put('$_path/player/play');
+  }
+
+  Future<void> pause() async {
+    await _api._put('$_path/player/pause');
+  }
+
+  Future<void> next() async {
+    await _api._post('$_path/player/next');
+  }
+
+  Future<void> previous() async {
+    await _api._post('$_path/player/previous');
+  }
+
+  Future<void> addToQueue(String uri) async {
+    await _api._post('$_path/player/queue?' + _buildQuery({'uri': uri}));
+  }
+
+  Future<Iterable<PlayHistory>> recentlyPlayed({int limit, DateTime after, DateTime before}) async {
+    assert(after == null || before == null, 'Cannot specify both after and before.');
 
     final jsonString = await _api._get('$_path/player/recently-played?' +
-        _buildQuery({
-          'limit': limit,
-          'after': after?.millisecondsSinceEpoch,
-          'before': before?.millisecondsSinceEpoch
-        }));
+        _buildQuery({'limit': limit, 'after': after?.millisecondsSinceEpoch, 'before': before?.millisecondsSinceEpoch}));
     final map = json.decode(jsonString);
     return map['items'].map<PlayHistory>((item) => PlayHistory.fromJson(item));
   }
